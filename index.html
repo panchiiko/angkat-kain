@@ -1,0 +1,434 @@
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dah Gelap! Angkat Kain 🏠☔</title>
+<style>
+  :root {
+    --bg: #cfe8fb;            /* baby blue sky */
+    --card: #ffffff;
+    --text: #0b3358;          /* ocean navy */
+    --muted: #4a6b8a;
+    --accent: #0b3358;
+    --accent-bright: #1b6fb8;
+    --warn-bg: #fff7ed;
+    --warn-border: #f59e0b;
+    --warn-text: #92400e;
+    --high: #e63946;
+    --high-bg: #ffe8ea;
+    --med: #f59e0b;
+    --med-bg: #fff4d6;
+    --low: #1b6fb8;
+    --low-bg: #e3f0fb;
+    --ok: #1b6fb8;
+    --grass: #7ec850;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: "Segoe UI", "Comic Sans MS", system-ui, sans-serif;
+    background: linear-gradient(180deg, #a7d4f5 0%, var(--bg) 45%, #e8f5ff 100%);
+    color: var(--text);
+    line-height: 1.5;
+    padding: 24px 16px 48px;
+    overflow-x: hidden;
+  }
+  .wrap { max-width: 720px; margin: 0 auto; position: relative; z-index: 2; }
+
+  /* floating clouds + sun (3D-ish scene) */
+  .sky { position: fixed; inset: 0; z-index: 0; pointer-events: none; overflow: hidden; }
+  .cloud {
+    position: absolute;
+    font-size: 3rem;
+    filter: drop-shadow(0 6px 4px rgba(11,51,88,0.15));
+    animation: drift linear infinite, bob 3s ease-in-out infinite;
+  }
+  @keyframes drift { from { transform: translateX(-15vw); } to { transform: translateX(115vw); } }
+  @keyframes bob { 0%,100% { margin-top: 0; } 50% { margin-top: 10px; } }
+  .sun {
+    position: absolute; top: 30px; right: 40px;
+    font-size: 3.4rem;
+    filter: drop-shadow(0 0 18px rgba(255,196,0,0.7));
+    animation: spinSlow 14s linear infinite;
+  }
+  @keyframes spinSlow { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+  .hills {
+    position: fixed; left: 0; right: 0; bottom: 0; height: 110px; z-index: 1; pointer-events: none;
+  }
+  .hill {
+    position: absolute; bottom: -50px; width: 160%; height: 140px;
+    background: var(--grass); border-radius: 50% 50% 0 0;
+    box-shadow: inset 0 8px 0 rgba(255,255,255,0.25);
+  }
+  .hill.back { left: -30%; transform: rotate(-2deg); background: #a5d97a; }
+  .hill.front { left: -60%; transform: rotate(1.5deg); }
+
+  header { text-align: center; margin-bottom: 26px; }
+  header .logo {
+    display: inline-block;
+    font-size: 2rem;
+    animation: bob 2.4s ease-in-out infinite;
+    filter: drop-shadow(0 8px 6px rgba(11,51,88,0.25));
+  }
+  header h1 {
+    font-size: 1.9rem; letter-spacing: -0.5px; color: var(--accent);
+    text-shadow: 0 3px 0 #8fc4e8;
+    transform: perspective(500px) rotateX(8deg);
+  }
+  header p { color: var(--muted); margin-top: 6px; font-size: 0.95rem; }
+
+  /* chunky toy cards */
+  section {
+    background: var(--card);
+    border-radius: 24px;
+    border: 3px solid #bcdcf2;
+    border-bottom-width: 6px;
+    padding: 22px;
+    margin-bottom: 22px;
+    box-shadow: 0 10px 0 rgba(11,51,88,0.10), 0 18px 24px rgba(11,51,88,0.10);
+    transform: perspective(900px);
+    transition: transform 0.25s;
+  }
+  section:hover { transform: perspective(900px) translateY(-4px); }
+  section h2 { font-size: 1.15rem; margin-bottom: 4px; color: var(--accent); }
+  section .sub { color: var(--muted); font-size: 0.85rem; margin-bottom: 14px; }
+
+  /* chunky 3D buttons */
+  button {
+    font: inherit; font-weight: 700;
+    cursor: pointer;
+    border: none;
+    border-radius: 16px;
+    padding: 12px 20px;
+    background: var(--accent-bright);
+    color: #fff;
+    box-shadow: 0 5px 0 #0e4a80, 0 8px 12px rgba(11,51,88,0.25);
+    transition: transform 0.1s, box-shadow 0.1s, filter 0.15s;
+  }
+  button:hover { filter: brightness(1.1); }
+  button:active {
+    transform: translateY(4px);
+    box-shadow: 0 1px 0 #0e4a80, 0 3px 6px rgba(11,51,88,0.2);
+  }
+  .btn-big { font-size: 1.05rem; }
+
+  /* Section 1 */
+  .risk-badge {
+    display: inline-block;
+    padding: 5px 14px;
+    border-radius: 999px;
+    font-size: 0.8rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    background: #c7dcef;
+    color: var(--muted);
+    margin-bottom: 12px;
+    box-shadow: 0 3px 0 rgba(11,51,88,0.12);
+  }
+  .risk-badge.high { background: var(--high-bg); color: var(--high); animation: wiggle 0.5s ease-in-out 2; }
+  .risk-badge.medium { background: var(--med-bg); color: var(--med); }
+  .risk-badge.low { background: var(--low-bg); color: var(--low); }
+  @keyframes wiggle { 0%,100% { transform: rotate(0); } 25% { transform: rotate(-3deg); } 75% { transform: rotate(3deg); } }
+  #alertBanner {
+    border-radius: 18px;
+    padding: 16px;
+    background: var(--warn-bg);
+    border: 3px solid var(--warn-border);
+    margin-bottom: 14px;
+    transform: perspective(600px) rotateX(3deg);
+    box-shadow: 0 6px 0 rgba(245,158,11,0.25);
+  }
+  #alertBanner .alert-emoji { font-size: 2rem; display: inline-block; animation: bob 1.6s ease-in-out infinite; }
+  #alertBanner h3 { font-size: 1.3rem; color: var(--warn-text); margin-bottom: 6px; }
+  #alertBanner p { font-size: 0.94rem; color: #7c4a12; }
+  #checkNote { font-size: 0.83rem; color: var(--muted); margin-top: 10px; min-height: 1.2em; }
+
+  /* Section 2 */
+  #reminderList { list-style: none; margin-bottom: 14px; }
+  #reminderList li {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 11px 16px;
+    border: 2px solid #d8e9f5;
+    border-bottom-width: 4px;
+    border-radius: 16px;
+    margin-bottom: 10px;
+    font-size: 0.95rem;
+    font-weight: 600;
+    background: #f4faff;
+    transition: all 0.2s;
+  }
+  #reminderList li .emo { font-size: 1.3rem; margin-right: 10px; }
+  #reminderList li .tag { font-size: 0.72rem; font-weight: 700; padding: 3px 10px; border-radius: 999px; }
+  .tag.urgent { background: var(--high-bg); color: var(--high); }
+  .tag.normal { background: #c7dcef; color: var(--muted); }
+  #reminderList li.urgent-flash {
+    background: var(--high-bg);
+    border-color: var(--high);
+    font-weight: 800;
+    animation: hop 0.5s ease-in-out 4;
+  }
+  @keyframes hop { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-8px) scale(1.03); } }
+  #urgentMsg {
+    display: none;
+    background: var(--high-bg);
+    border: 3px solid var(--high);
+    color: #7a2e2e;
+    padding: 12px 16px;
+    border-radius: 16px;
+    font-weight: 800;
+    margin-bottom: 14px;
+    font-size: 1.05rem;
+    animation: pop 0.35s cubic-bezier(0.68,-0.55,0.27,1.55);
+  }
+  @keyframes pop { from { transform: scale(0.5); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+
+  /* Section 3 */
+  .post {
+    border: 3px solid #d8e9f5;
+    border-bottom-width: 5px;
+    border-radius: 18px;
+    padding: 14px 18px;
+    margin-bottom: 12px;
+    cursor: pointer;
+    background: #f4faff;
+    transition: all 0.2s;
+    transform: perspective(600px);
+  }
+  .post:hover { border-color: var(--accent-bright); transform: perspective(600px) translateY(-3px); }
+  .post .meta { display: flex; justify-content: space-between; font-size: 0.78rem; color: var(--muted); margin-bottom: 6px; }
+  .post .meta .area { font-weight: 700; color: var(--accent-bright); }
+  .post h4 { font-size: 1rem; margin-bottom: 4px; }
+  .post p { font-size: 0.9rem; color: #35506b; }
+  .post .status {
+    display: inline-block;
+    margin-top: 8px;
+    font-size: 0.75rem;
+    font-weight: 700;
+    padding: 3px 12px;
+    border-radius: 999px;
+    background: #c7dcef;
+    color: var(--muted);
+  }
+  .post.acknowledged {
+    background: var(--low-bg);
+    border-color: var(--ok);
+  }
+  .post.acknowledged .status { background: var(--ok); color: #fff; }
+  .post .ackEmoji { display: none; font-size: 1.4rem; animation: pop 0.3s cubic-bezier(0.68,-0.55,0.27,1.55); }
+  .post.acknowledged .ackEmoji { display: inline-block; }
+  .feedHint { font-size: 0.8rem; color: var(--muted); margin-top: 4px; }
+  footer { text-align: center; font-size: 0.8rem; color: var(--muted); margin-top: 8px; }
+
+  /* Rain animation overlay */
+  #rainOverlay {
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 50;
+    opacity: 0;
+    transition: opacity 0.6s ease;
+  }
+  #rainOverlay.on { opacity: 1; }
+  #rainOverlay .drop {
+    position: absolute;
+    top: -40px;
+    width: 2px;
+    border-radius: 2px;
+    background: linear-gradient(180deg, rgba(27,111,184,0) 0%, rgba(27,111,184,0.55) 100%);
+    animation: fall linear infinite;
+  }
+  @keyframes fall { to { transform: translateY(110vh); } }
+  #rainOverlay.high .drop { height: 26px; background: linear-gradient(180deg, rgba(11,51,88,0) 0%, rgba(11,51,88,0.65) 100%); }
+  #rainOverlay.medium .drop { height: 16px; }
+</style>
+</head>
+<body>
+<div class="sky">
+  <div class="sun">☀️</div>
+  <div class="cloud" style="top:6%; animation-duration:38s, 3s;">☁️</div>
+  <div class="cloud" style="top:16%; font-size:2.2rem; animation-duration:55s, 4s; animation-delay:0s,1s;">☁️</div>
+  <div class="cloud" style="top:3%; font-size:1.6rem; animation-duration:70s, 3.4s; animation-delay:0s,0.5s;">☁️</div>
+</div>
+<div class="hills">
+  <div class="hill back"></div>
+  <div class="hill front"></div>
+</div>
+<div id="rainOverlay"></div>
+
+<div class="wrap">
+  <header>
+    <span class="logo">🧺☔</span>
+    <h1>Dah Gelap! Angkat Kain!</h1>
+    <p>Storm coming? Save your laundry! 🏁 (sample app, no real forecast)</p>
+  </header>
+
+  <!-- 1. Weather Alert Banner -->
+  <section id="section-alert">
+    <h2>🌦️ Storm Check</h2>
+    <p class="sub">Tap satu kali — tahu terus status langit!</p>
+    <span id="riskBadge" class="risk-badge">READY</span>
+    <div id="alertBanner">
+      <span class="alert-emoji">👀</span>
+      <h3 id="alertTitle">Langit cerah... for now! ☀️</h3>
+      <p id="alertText">Tap the button below to check storm risk. Sample only — bukan ramalan sebenar!</p>
+    </div>
+    <button id="checkBtn" class="btn-big">🌩️ Check Storm Risk!</button>
+    <p id="checkNote"></p>
+  </section>
+
+  <!-- 2. Quick Laundry Reminder -->
+  <section id="section-reminder">
+    <h2>🧺 Angkat Kain, Fast Fast!</h2>
+    <p class="sub">Stuff outside? Grab it before the rain arrives!</p>
+    <div id="urgentMsg">🏃💨 Angkat kain sekarang! Jangan tunggu!</div>
+    <ul id="reminderList"></ul>
+    <button id="urgentBtn" class="btn-big">⭐ Which one first?</button>
+  </section>
+
+  <!-- 3. Neighbourhood Feed -->
+  <section id="section-feed">
+    <h2>📣 Jiran Feed</h2>
+    <p class="sub">Neighbourhood alerts — tap to mark "dah baca"!</p>
+    <div id="feed"></div>
+    <p class="feedHint">All posts are made-up examples sahaja. 😄</p>
+  </section>
+
+  <footer>🧺 Dah Gelap! Angkat Kain · sample data only, tiada simpan · bukan amaran rasmi 🏁</footer>
+</div>
+
+<script>
+// ---- Section 2: reminder items ----
+const items = [
+  { emo: "👕", name: "Kain & cadar di ampaian", urgent: true },
+  { emo: "🪣", name: "Tong & baldi", urgent: false },
+  { emo: "👟", name: "Kasut & tikar getah", urgent: false },
+  { emo: "🪑", name: "Kerusi plastik & barang ringan", urgent: false },
+];
+const listEl = document.getElementById("reminderList");
+items.forEach((it, i) => {
+  const li = document.createElement("li");
+  li.id = "item-" + i;
+  li.innerHTML = `<span><span class="emo">${it.emo}</span>${it.name}</span><span class="tag ${it.urgent ? "urgent" : "normal"}">${it.urgent ? "PENTING!" : "OK later"}</span>`;
+  listEl.appendChild(li);
+});
+
+const urgentMsg = document.getElementById("urgentMsg");
+document.getElementById("urgentBtn").addEventListener("click", () => {
+  document.querySelectorAll("#reminderList li").forEach(li => li.classList.remove("urgent-flash"));
+  const target = document.getElementById("item-0");
+  target.classList.add("urgent-flash");
+  urgentMsg.style.display = "block";
+  urgentMsg.textContent = "👕 Kain dulu! " + "Angkat kain sekarang — jangan tunggu hujan turun!";
+  target.scrollIntoView({ behavior: "smooth", block: "nearest" });
+});
+
+// ---- Section 1: storm risk check ----
+const risks = [
+  {
+    level: "high",
+    label: "⚠️ HIGH!",
+    title: "Dah gelap! Angkat kain SEKARANG! 🌩️",
+    text: "Big storm cloud confirmed! Rain + wind coming fast. Grab the kain, grab the baldi — GO GO GO!",
+  },
+  {
+    level: "medium",
+    label: "Sederhana",
+    title: "Mendung sikit... get ready! ⛅",
+    text: "Sky is cloudy, rain maybe in a few hours. No new wash today — kain yang ada, ambil masuk dulu!",
+  },
+  {
+    level: "low",
+    label: "Aman ☀️",
+    title: "Cerah! Kain selamat 😎",
+    text: "Sky is clear, laundry can stay out. Tapi jangan lupa — Malaysian weather boleh berubah cepat!",
+  },
+];
+const badge = document.getElementById("riskBadge");
+const alertTitle = document.getElementById("alertTitle");
+const alertText = document.getElementById("alertText");
+const checkNote = document.getElementById("checkNote");
+let pick = 0;
+
+// ---- Rain animation ----
+const rainOverlay = document.getElementById("rainOverlay");
+let rainDropsMade = false;
+function makeDrops() {
+  for (let i = 0; i < 70; i++) {
+    const d = document.createElement("div");
+    d.className = "drop";
+    d.style.left = Math.random() * 100 + "%";
+    d.style.animationDuration = (0.5 + Math.random() * 0.7) + "s";
+    d.style.animationDelay = (Math.random() * 1.2) + "s";
+    d.style.opacity = 0.4 + Math.random() * 0.6;
+    rainOverlay.appendChild(d);
+  }
+  rainDropsMade = true;
+}
+function setRain(level) {
+  if (!rainDropsMade) makeDrops();
+  rainOverlay.classList.remove("high", "medium", "on");
+  if (level === "high" || level === "medium") {
+    rainOverlay.classList.add(level);
+    requestAnimationFrame(() => rainOverlay.classList.add("on"));
+  }
+}
+
+document.getElementById("checkBtn").addEventListener("click", () => {
+  const r = risks[pick % risks.length];
+  pick++;
+  badge.textContent = r.label;
+  badge.className = "risk-badge " + r.level;
+  alertTitle.textContent = r.title;
+  alertText.textContent = r.text;
+  checkNote.textContent = "Sample sahaja — bukan ramalan sebenar. (Tap again for other levels!)";
+  setRain(r.level);
+  if (r.level !== "low") {
+    urgentMsg.style.display = "block";
+    urgentMsg.textContent = "🏃💨 " + (r.level === "high" ? "Hujan lebat!" : "Mendung berat!") + " Angkat kain sekarang!";
+  }
+});
+
+// ---- Section 3: neighbourhood feed ----
+const posts = [
+  {
+    area: "🛴 Taman Melati, KL",
+    time: "2:40pm",
+    title: "Gelap east side! Kain masuk cepat!",
+    body: "Baru balik kerja — langit arah Genting dah hitam pekat! Jiran-jiran, angkat kain sekarang ye!",
+  },
+  {
+    area: "🏠 Taman Sri Muda, Shah Alam",
+    time: "3:15pm",
+    title: "Angin kuat... pagar bergetar!",
+    body: "Rain not here yet tapi angin dah gila kuat. My barang all safe inside. Wake up your sleeping jiran! 😴➡️🏃",
+  },
+  {
+    area: "🌊 Bandar Baru UDA, JB",
+    time: "4:05pm",
+    title: "Hujan dah start dekat laut!",
+    body: "Nampak rain dekat Straits View. Belum sampai sini lagi — maybe 15-20 min. Kasut pun angkat masuk ye! 👟",
+  },
+];
+const feedEl = document.getElementById("feed");
+posts.forEach((p, i) => {
+  const div = document.createElement("div");
+  div.className = "post";
+  div.id = "post-" + i;
+  div.innerHTML = `
+    <div class="meta"><span class="area">${p.area}</span><span>${p.time}</span></div>
+    <h4>${p.title}</h4>
+    <p>${p.body}</p>
+    <span class="ackEmoji">✅</span>
+    <span class="status">Tap: mark "dah baca"</span>`;
+  div.addEventListener("click", () => {
+    const ack = div.classList.toggle("acknowledged");
+    div.querySelector(".status").textContent = ack ? "Dah baca! Nice one 👍" : "Tap: mark \"dah baca\"";
+  });
+  feedEl.appendChild(div);
+});
+</script>
+</body>
+</html>
